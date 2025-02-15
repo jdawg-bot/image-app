@@ -14,6 +14,7 @@ import { Amplify } from "aws-amplify";
 import "@aws-amplify/ui-react/styles.css";
 import { generateClient } from "aws-amplify/data";
 import outputs from "../amplify_outputs.json";
+
 /**
  * @type {import('aws-amplify/data').Client<import('../amplify/data/resource').Schema>}
  */
@@ -51,6 +52,24 @@ export default function App() {
 
     await client.models.Expense.delete(toBeDeletedExpense);
   }
+  async function uploadImage(event) {
+    event.preventDefault();
+    const fileInput = event.target.elements.imageFile;
+    if (!fileInput || fileInput.files.length === 0) {
+      console.log("No file selected.");
+      return;
+    }
+    const file = fileInput.files[0];
+    try {
+      const result = await Storage.put(file.name, file, {
+        contentType: file.type,
+      });
+      console.log("Image uploaded:", result);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+  }
+  
 
   return (
     <Authenticator>
@@ -63,7 +82,7 @@ export default function App() {
           width="70%"
           margin="0 auto"
         >
-          <Heading level={1}>Expense Tracker</Heading>
+          <Heading level={1}>Image Uploader</Heading>
           <View as="form" margin="3rem 0" onSubmit={createExpense}>
             <Flex
               direction="column"
@@ -93,7 +112,15 @@ export default function App() {
                 Create Expense
               </Button>
             </Flex>
+            
           </View>
+          <View as="form" onSubmit={uploadImage} margin="2rem 0">
+  <input type="file" name="imageFile" accept="image/*" />
+  <Button type="submit" variation="primary">
+    Upload Image
+  </Button>
+</View>
+          
           <Divider />
           <Heading level={2}>Expenses</Heading>
           <Grid
@@ -133,5 +160,7 @@ export default function App() {
         </Flex>
       )}
     </Authenticator>
+    
   );
+  
 }
